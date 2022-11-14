@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="shared/theme.css">
+    <link rel="stylesheet" href="shared/content.css">
+    <script src="/timezone/script.js"></script>
+    <title>Timezone</title>
+</head>
+
+<body>
+    <p>Your timezone is <span id="timezone">
+            <noscript>
+                <span class="error">JavaScript is disabled. Please enable JavaScript to see your timezone.</span>
+                <style>
+                    .error {
+                        color: red;
+                    }
+
+                    .fetch {
+                        display: none;
+                    }
+                </style>
+            </noscript>
+        </span>
+    </p>
+    <p class="fetch">
+        If you want, you may fetch your timezone using <a href="https://worldtimeapi.org/">worldtimeapi.org</a>.
+        <button onclick="fetchTimezone()">Fetch</button>
+    </p>
+</body>
+
+</html>
