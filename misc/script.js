@@ -1,5 +1,6 @@
 const files = [
     'rsa.js',
+    'functionWrapper.js',
 ];
 
 const list = document.createElement('ul');
