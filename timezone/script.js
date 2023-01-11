@@ -1,4 +1,6 @@
-let toCopy;
+import { setup } from "/shared/init.js";
+
+let toCopy, output;
 
 window.fetchTimezone = () => {
     const output = document.getElementById('timezone');
@@ -11,9 +13,9 @@ window.fetchTimezone = () => {
         });
 }
 
-window.addEventListener('DOMContentLoaded', () => {
+setup(({ timezone: out, copy}) => {
 
-    const output = document.getElementById('timezone');
+    output = out;
     const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     if (!timezone) {
         output.innerHTML = 'Timezone not found. Consider clicking the button below to fetch it.';
@@ -26,8 +28,7 @@ window.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-	const copy = document.getElementById('copy');
 	copy.addEventListener('click', () => {
 		navigator.clipboard.writeText(toCopy);
 	})
-});
+}, ['timezone', 'copy']);

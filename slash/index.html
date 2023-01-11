@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/shared/theme.css">
+    <link rel="stylesheet" href="/shared/content.css">
+    <script src="/slash/script.js" type="module"></script>
+    <title>Slash Tools</title>
+</head>
+
+<body>
+    <h1>Slash Tools</h1>
+    <div id="loginDiv" hidden>
+        <p>
+            <label for="clientID">Client ID:</label>
+            <input type="text" id="clientID">
+        </p>
+        <p>
+            <label for="clientSecret">Client Secret:</label>
+            <input type="password" id="clientSecret">
+        </p>
+        <p>
+            <button id="loginButton">Login</button>
+        </p>
+    </div>
+
+    <div id="loadingDiv" hidden>
+        <p>
+            Loading
+        </p>
+    </div>
+
+    <div id="commandsDiv" hidden>
+        <p>Logged in as <span id="botName"></span>, owned by <span id="userName"></span>.</p>
+        <p>
+            <button id="globalButton">Get Global Commands</button>
+        </p>
+        <p>
+            <label for="guildID">Guild ID:</label>
+            <input type="text" id="guildID">
+        </p>
+        <p>
+            <button id="guildButton">Get Guild Commands</button>
+        </p>
+        <p>
+            <button id="logoutButton">Logout</button>
+        </p>
+    </div>
+
+    <div id="commandListDiv" hidden>
+        <p><span id="commandType"></span> Commands</p>
+        <button id="deleteAll">Delete All</button>
+        <button id="createCommand" hidden>Create Command</button>
+        <button id="backButton">Back</button>
+        <ul id="commandList"></ul>
+    </div>
+
+    <div id="createCommand" hidden>
+        <form id="createCommandForm">
+            <p>
+                <label for="name">Name:</label>
+                <input type="text" name="name">
+            </p>
+            <p>
+                <label for="description">Type:</label>
+                <select name="type">
+                    <option value="1">Chat Input</option>
+                    <option value="2">User</option>
+                    <option value="3">Message</option>
+                </select>
+            </p>
+            <p>
+                <label for="description">Description:</label>
+                <input type="text" name="description">
+            </p>
+            <p>
+                <label for="nsfw">NSFW:</label>
+                <input type="checkbox" name="nsfw">
+        </form>
+    </div>
+</body>
+
+</html>

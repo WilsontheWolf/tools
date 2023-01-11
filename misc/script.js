@@ -1,3 +1,5 @@
+import { setup } from "/shared/init.js";
+
 const files = [
     'rsa.js',
     'functionWrapper.js',
@@ -13,6 +15,6 @@ files.forEach(file => {
     list.appendChild(li);
 });
 
-document.addEventListener('DOMContentLoaded', () => {
+setup(() => {
     document.body.appendChild(list);
 });

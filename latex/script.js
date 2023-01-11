@@ -1,10 +1,16 @@
-let input, output, err, options;
+import { setup } from '/shared/init.js';
+
+let el = {};
 
 const cursor = '\\cursor'
-const preMath = '\\def\\cursor{{\\color{yellow}\\Downarrow}}'
+const macro = '{\\color{yellow}\\Downarrow}'
+const defaultOptions = {
+    cursor: true,
+};
 
 const showError = (error) => {
     console.error(error);
+    const { error: err, output } = el;
     if (!err) return;
     err.innerText = error.message;
     err.hidden = false;
@@ -14,14 +20,13 @@ const showError = (error) => {
 };
 
 const hideError = () => {
-    if (!err) return;
-    err.hidden = true;
-}
+    const { error } = el;
+    if (!error) return;
+    error.hidden = true;
+};
 
-const defaultOptions = {
-    cursor: true,
-}
 const getOptions = () => {
+    const { options } = el;
     if (!options) return defaultOptions;
     return {
         ...defaultOptions,
@@ -34,20 +39,15 @@ const getOptions = () => {
             return acc;
         }, {})
     };
-}
-
-const genMath = (math) => {
-    if (!math) return '';
-    if (!getOptions().cursor) return math;
-    return preMath + '\n' + math;
 };
 
 const render = () => {
+    const { input, output } = el;
     if (!input || !output) throw new Error('Page not loaded properly');
     if (!katex) throw new Error('Katex not loaded properly.');
     let math = input.value;
     if (!math) return output.innerText = '';
-    const {cursor: shouldShowPos} = getOptions();
+    const { cursor: shouldShowPos } = getOptions();
     if (shouldShowPos) {
         // Get cursor pos
         input.focus();
@@ -59,8 +59,9 @@ const render = () => {
             math = math.replace(regex, `$&${cursor} `);
         }
     }
-    katex.render(genMath(math), output, {
+    katex.render(math, output, {
         throwOnError: false,
+        macros: cursor ? {'\\cursor': macro} : undefined,
     });
 };
 
@@ -71,18 +72,15 @@ const renderWithErrorHandler = () => {
     } catch (error) {
         showError(error);
     }
-}
+};
 
-
-window.addEventListener('DOMContentLoaded', () => {
-    input = document.getElementById('input');
-    output = document.getElementById('output');
-    err = document.getElementById('error');
-    options = document.getElementById('options');
+setup((elements) => {
+    el = elements;
+    const { input, options } = el;
     input.addEventListener('input', renderWithErrorHandler);
     input.addEventListener('selectionchange', renderWithErrorHandler);
     Array.from(options.children).forEach(c => {
         c.addEventListener('change', renderWithErrorHandler);
     });
     renderWithErrorHandler();
-});
+}, ['input', 'output', 'options', 'error']);
