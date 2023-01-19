@@ -62,6 +62,7 @@ const render = () => {
     katex.render(math, output, {
         throwOnError: false,
         macros: cursor ? {'\\cursor': macro} : undefined,
+        displayMode: true,
     });
 };
 
