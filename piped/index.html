@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/shared/theme.css">
+    <link rel="stylesheet" href="/shared/content.css">
+    <link rel="stylesheet" href="/piped/index.css">
+    <script src="/piped/script.js" type="module"></script>
+    <title>Piped API Feed</title>
+</head>
+
+<body>
+    <h1>Piped API Feed</h1>
+    <div id="setup" hidden>
+        <form>
+            <input type="text" name="url" id="url" placeholder="URL">
+        </form>
+    </div>
+    <div id="feed" hidden>
+        <button id="reset">Reset</button>
+        <button id="finish">Finish</button>
+        <div id="feed-content"></div>
+    </div>
+</body>
+
+</html>

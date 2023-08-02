@@ -1,0 +1,14 @@
+.item {
+    margin-bottom: 2em;
+}
+
+.item > h2 {
+    margin-bottom: 0.5em;
+}
+
+.author {
+  font-style: italic;
+  font-size: .75em;
+  font-weight: bolder;
+  color: gray;
+}
