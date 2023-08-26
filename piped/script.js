@@ -2,10 +2,58 @@ const setup = document.getElementById('setup');
 const feed = document.getElementById('feed');
 const content = document.getElementById('feed-content');
 
+const videoBase = 'https://piped.shorty.systems'; // I can't get this from the api without getting both feed types.
+let apiBase;
 const selected = new Map();
-console.log(selected);
+
+const relativeUrl = (url) => new URL(url, videoBase).toString();
+
+const handleDuration = (duration) => {
+    const hours = Math.floor(duration / 3600);
+    const minutes = Math.floor((duration % 3600) / 60);
+    const seconds = Math.floor(duration % 60);
+    const parts = [];
+    if (hours) parts.push(hours);
+    parts.push(minutes.toString().padStart(2, '0'));
+    parts.push(seconds.toString().padStart(2, '0'));
+    return parts.join(':');
+};
+
+const arrows = [];
+const requestArrow = (link, callback) => {
+    link = new URL(link, videoBase);
+    const id = link.searchParams.get('v');
+    if (!id) return;
+    arrows.push({ id, callback });
+};
+
+const handleArrows = async () => {
+    const url = `https://${apiBase}/dearrow/?videoIds=${arrows.map(a => a.id).join(',')}`;
+    const res = await fetch(url).catch((e) => e);
+    if (res instanceof Error) {
+        console.error('Error fetching arrows!', res);
+        return;
+    }
+    if (!res.ok) {
+        console.error('Error fetching arrows!', res);
+        return;
+    }
+    const data = await res.json().catch((e) => e);
+    if (data instanceof Error) {
+        console.error('Error parsing arrows!', data);
+        return;
+    }
+    arrows.forEach((arrow) => {
+        arrow.callback(data[arrow.id]);
+    });
+};
 
 const load = async (url) => {
+    const urlObject = new URL(url);
+    if (urlObject.pathname.endsWith('/rss'))
+        urlObject.pathname = urlObject.pathname.slice(0, -4);
+    url = urlObject.toString();
+    apiBase = urlObject.hostname;
     content.innerText = 'Loading...';
     const res = await fetch(url).catch((e) => e);
     if (res instanceof Error) {
@@ -21,30 +69,26 @@ const load = async (url) => {
         return;
     }
 
-    // Parse XML
-    const xml = await res.text();
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(xml, 'application/xml');
-
-    const errorNode = doc.querySelector('parsererror');
-    if (errorNode !== null) {
+    // Parse JSON
+    /** @type {object[]} */
+    const json = await res.json().catch((e) => e);
+    if (json instanceof Error) {
         content.innerText = 'Error parsing feed!';
         content.innerHTML += '<br>';
-        content.innerText += errorNode.textContent;
+        content.innerText += json.message;
         return;
     }
-
-    console.log(doc);
-
-    const items = doc.querySelectorAll('entry');
+    console.log(json);
 
     content.innerHTML = ``;
 
-    items.forEach((item) => {
+    const imgHeight = document.body.clientWidth / 1.7; // Prevents moving the page
+    json.slice(0, 200).forEach((item) => {
+        if (item.isShort) return;
         const div = document.createElement('div');
         div.classList.add('item');
         const imgEl = document.createElement('img');
-        imgEl.height = 450; // Rough height of a youtube thumbnail
+        imgEl.height = imgHeight; // Rough height of a youtube thumbnail
         imgEl.onload = () => {
             imgEl.removeAttribute('height');
             // Prevents the image from being stretched
@@ -55,9 +99,8 @@ const load = async (url) => {
         const watchButton = document.createElement('a');
         watchButton.innerHTML = '<button>Watch</button>';
         div.appendChild(watchButton);
+        const link = relativeUrl(item.url);
 
-        const link = item.querySelector('link')?.getAttribute('href');
-        if (!link) return;
         watchButton.href = link;
 
         const audioButton = document.createElement('button');
@@ -74,51 +117,60 @@ const load = async (url) => {
         div.appendChild(downloadDiv);
 
         audioButton.onclick = () => {
-            audioButton.innerText =  '✅ Download Audio';
+            audioButton.innerText = '✅ Download Audio';
             videoButton.innerText = 'Download Video';
             cancel.disabled = false;
             selected.set(link, 'audio');
         };
 
         videoButton.onclick = () => {
-            audioButton.innerText =  'Download Audio';
+            audioButton.innerText = 'Download Audio';
             videoButton.innerText = '✅ Download Video';
             cancel.disabled = false;
             selected.set(link, 'video');
         };
 
         cancel.onclick = () => {
-            audioButton.innerText =  'Download Audio';
+            audioButton.innerText = 'Download Audio';
             videoButton.innerText = 'Download Video';
             cancel.disabled = true;
             selected.delete(link);
         };
 
-        const title = item.querySelector('title')?.innerHTML;
-        titleEl.innerText = title;
-        if (title?.includes('#shorts')) return;
+        const titleSpan = document.createElement('span');
+        titleSpan.innerText = item.title;
+        titleEl.appendChild(titleSpan);
 
-        const author = item.querySelector('author');
-        if (author) {
-            const name = author.querySelector('name')?.innerHTML;
-            const link = author.querySelector('uri')?.innerHTML;
-            const authorEl = document.createElement('span');
-            authorEl.innerText = ' by ';
-            authorEl.classList.add('author');
-            const authorLink = document.createElement('a');
-            authorLink.innerText = name;
-            authorLink.href = link;
-            authorEl.appendChild(authorLink);
+        const authorEl = document.createElement('span');
+        authorEl.innerText = ' by ';
+        authorEl.classList.add('author');
+        const authorLink = document.createElement('a');
+        authorLink.innerText = item.uploaderName;
+        authorLink.href = relativeUrl(item.uploaderUrl);
+        authorEl.appendChild(authorLink);
 
-            titleEl.appendChild(authorEl);
-        }
-        const img = item.querySelector('img')?.src;
-        if (img) imgEl.src = img;
-        else imgEl.hidden = true;
+        const durationEl = document.createElement('span');
+        durationEl.innerText = ' - [' + handleDuration(item.duration) + ']';
+        authorEl.appendChild(durationEl);
 
+        titleEl.appendChild(authorEl);
+        imgEl.src = item.thumbnail;
+
+        requestArrow(link, (arrow) => {
+            const thumbnail = arrow.thumbnails[0];
+            if (thumbnail && (thumbnail.locked || thumbnail.votes >= 0 && !thumbnail.original)) {
+                imgEl.src = thumbnail.thumbnail;
+            }
+            const title = arrow.titles[0];
+            if (title && (title.locked || title.votes >= 0)) {
+                titleSpan.innerText = title.title;
+            }
+
+        });
 
         content?.appendChild(div);
     });
+    await handleArrows();
 };
 
 let url = window.localStorage.getItem('pipedUrl');
@@ -146,23 +198,23 @@ reset.addEventListener('click', () => {
 
 const finish = document.getElementById('finish');
 finish.addEventListener('click', () => {
-    if(selected.size === 0) return alert('No videos selected!');
+    if (selected.size === 0) return alert('No videos selected!');
     const audio = [];
     const video = [];
     selected.forEach((type, link) => {
         const url = new URL(link);
         url.hostname = 'youtube.com';
 
-        if(type === 'audio') audio.push(url.toString());
+        if (type === 'audio') audio.push(url.toString());
         else video.push(url.toString());
     });
 
     let fin = '';
-    if(audio.length) {
+    if (audio.length) {
         fin += 'yt-wa ' + audio.join(' ');
-        if(video.length) fin += ' && ';
+        if (video.length) fin += ' ; ';
     }
-    if(video.length) fin += 'yt-v ' + video.join(' ');
+    if (video.length) fin += 'yt-v ' + video.join(' ');
 
     console.log(fin);
 

@@ -13,3 +13,7 @@ textarea {
 img {
     width: 100%;
 }
+
+pre {
+    overflow-y: auto;
+}
