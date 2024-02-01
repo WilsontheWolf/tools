@@ -24,3 +24,34 @@ function handleTime() {
 };
 
 window.requestAnimationFrame(handleTime);
+
+function setGuide(val) {
+    if (val) {
+        document.body.classList.add('guide');
+    } else {
+        document.body.classList.remove('guide');
+    }
+    localStorage.setItem('guide', val);
+}
+
+const urlParams = new URLSearchParams(window.location.search);
+if (urlParams.has('guide')) {
+    const guide = urlParams.get('guide');
+    if (guide === 'true') {
+        setGuide(true);
+    } else if (guide === 'false') {
+        setGuide(false);
+    }
+}
+
+if (localStorage.getItem('guide') === 'false') {
+    setGuide(false);
+} else {
+    setGuide(true);
+}
+
+window.addEventListener('keydown', (e) => {
+    if (e.key === 'g') {
+        setGuide(!document.body.classList.contains('guide'));
+    }
+});
