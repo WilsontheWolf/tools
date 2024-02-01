@@ -1,0 +1,38 @@
+:root {
+    height: 100%;
+}
+
+body {
+    height: 100%;
+    margin: 0;
+}
+
+div {
+    height: 50%;
+    width: 50%;
+    border: 1px solid black;
+}
+
+#day {
+    position: fixed;
+    top: 0;
+    left: 0;
+}
+
+#hours {
+    position: fixed;
+    top: 0;
+    right: 0;
+}
+
+#minutes {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+}
+
+#seconds {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+}
