@@ -203,7 +203,10 @@ finish.addEventListener('click', () => {
     const video = [];
     selected.forEach((type, link) => {
         const url = new URL(link);
-        url.hostname = 'youtube.com';
+        const v = url.searchParams.get("v");
+        url.hostname = 'youtu.be';
+        url.search = ""
+        url.pathname = `/${v}`
 
         if (type === 'audio') audio.push(url.toString());
         else video.push(url.toString());
